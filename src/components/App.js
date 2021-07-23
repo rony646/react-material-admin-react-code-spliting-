@@ -1,33 +1,42 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { HashRouter, Route, Switch, Redirect } from "react-router-dom";
-
-// components
-import Layout from "./Layout";
-
-// pages
-import Error from "../pages/error";
-import Login from "../pages/login";
 
 // context
 import { useUserState } from "../context/UserContext";
 
+// components
+const Layout = lazy(() => import(
+  /* webpackChunckName: "Layout" */
+  /* webpackPrefecth: true */
+  "./Layout"));
+
+// pages
+const Error = lazy(() => import(/* webpackChunckName: "Error" */"../pages/error"));
+const Login = lazy(() => import(
+  /* webpackChunckName: "Login" */
+  /* webpackPreload: true */
+  "../pages/login"));
+
+
 export default function App() {
   // global
-  var { isAuthenticated } = useUserState();
+  const { isAuthenticated } = useUserState();
 
   return (
     <HashRouter>
-      <Switch>
-        <Route exact path="/" render={() => <Redirect to="/app/dashboard" />} />
-        <Route
-          exact
-          path="/app"
-          render={() => <Redirect to="/app/dashboard" />}
-        />
-        <PrivateRoute path="/app" component={Layout} />
-        <PublicRoute path="/login" component={Login} />
-        <Route component={Error} />
-      </Switch>
+      <Suspense fallback={<>Loading...</>}>
+        <Switch>
+          <Route exact path="/" render={() => <Redirect to="/app/dashboard" />} />
+          <Route
+            exact
+            path="/app"
+            render={() => <Redirect to="/app/dashboard" />}
+          />
+          <PrivateRoute path="/app" component={Layout} />
+          <PublicRoute path="/login" component={Login} />
+          <Route component={Error} />
+        </Switch>
+      </Suspense>
     </HashRouter>
   );
 
